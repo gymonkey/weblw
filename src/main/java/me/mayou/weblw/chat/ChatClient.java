@@ -21,7 +21,7 @@ public class ChatClient extends Verticle {
     
     @Override
     public void start() {
-        vertx.createHttpClient().setHost("10.125.48.74").setPort(8080).connectWebsocket("/", new Handler<WebSocket>() {
+        vertx.createHttpClient().setHost("10.125.48.74").setPort(9999).connectWebsocket("/", new Handler<WebSocket>() {
             
             @Override
             public void handle(final WebSocket ws) {
@@ -29,10 +29,17 @@ public class ChatClient extends Verticle {
 
                     @Override
                     public void handle(Buffer buf) {
-                        logger.info(buf.toString());
+                        logger.info("receive " + buf.toString());
                     }
                 });
                 ws.writeTextFrame("hello vertx");
+                logger.info("send hello vertx");
+            }
+        }).exceptionHandler(new Handler<Throwable>() {
+
+            @Override
+            public void handle(Throwable t) {
+                logger.error(t.getMessage());
             }
         });
     }
