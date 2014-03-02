@@ -38,6 +38,7 @@ public class ChatClient extends Verticle {
     @Override
     public void start() {
         final HttpClient client = vertx.createHttpClient().setHost("10.125.48.74").setPort(9999);
+        final Verticle verticle = this;
 
         Thread t = new Thread() {
 
@@ -98,6 +99,7 @@ public class ChatClient extends Verticle {
                 }
 
                 client.close();
+                verticle.stop();
             }
         };
         t.start();
