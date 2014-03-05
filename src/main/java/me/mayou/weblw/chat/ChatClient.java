@@ -100,6 +100,7 @@ public class ChatClient extends Verticle {
 
                 client.close();
                 verticle.stop();
+                vertx.stop();
             }
         };
         t.start();
