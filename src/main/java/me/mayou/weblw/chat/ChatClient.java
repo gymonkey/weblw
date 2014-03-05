@@ -99,8 +99,7 @@ public class ChatClient extends Verticle {
                 }
 
                 client.close();
-                verticle.stop();
-                vertx.stop();
+                verticle.getContainer().exit();
             }
         };
         t.start();
