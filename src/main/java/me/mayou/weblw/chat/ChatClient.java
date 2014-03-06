@@ -37,71 +37,79 @@ public class ChatClient extends Verticle {
 
     @Override
     public void start() {
-        final HttpClient client = vertx.createHttpClient().setHost("10.125.48.74").setPort(9999);
-        final Verticle verticle = this;
+        final HttpClient client = vertx.createHttpClient().setHost("10.125.48.74").setPort(9999).connectWebsocket("/",
+                                                                                                                  new Handler<WebSocket>() {
 
-        Thread t = new Thread() {
+                                                                                                                      @Override
+                                                                                                                      public void handle(WebSocket event){
+                                                                                                                          event.writeTextFrame("hello");
 
-            @Override
-            public void run() {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-                while (true) {
-                    try {
-                        String cmdStr = reader.readLine();
-                        Cmd cmd = new Gson().fromJson(cmdStr, Cmd.class);
-                        Preconditions.checkNotNull(Strings.nullToEmpty(cmd.getCmd()));
-
-                        if (Objects.equal("quit", cmd.getCmd())) {
-                            break;
-                        } else if (Objects.equal("send", cmd.getCmd())) {
-                            Preconditions.checkArgument(cmd.getFid() > 0);
-                            Preconditions.checkArgument(cmd.getTid() > 0);
-                            Preconditions.checkArgument(cmd.getFid() != cmd.getTid());
-                            Preconditions.checkNotNull(wsMap.get(cmd.getFid()));
-                            Preconditions.checkNotNull(Strings.emptyToNull(cmd.getMsg()));
-
-                            Dialog dialog = new Dialog();
-                            dialog.setFid(cmd.getFid());
-                            dialog.setTid(cmd.getTid());
-                            dialog.setMsg(cmd.getMsg());
-
-                            logger.info("send msg: " + dialog.getFid() + ", from conn " + dialog.getFid()
-                                        + ", to conn " + dialog.getTid());
-
-                            wsMap.get(cmd.getFid()).writeTextFrame(cmdStr);
-                        } else if (Objects.equal("create", cmd.getCmd())) {
-                            client.connectWebsocket("/", new Handler<WebSocket>() {
-
-                                @Override
-                                public void handle(final WebSocket ws) {
-                                    ws.dataHandler(new Handler<Buffer>() {
-
-                                        @Override
-                                        public void handle(Buffer buf) {
-                                            Dialog dialog = new Gson().fromJson(buf.toString(), Dialog.class);
-                                            Preconditions.checkArgument(dialog.getFid() > 0);
-
-                                            if (Strings.isNullOrEmpty(dialog.getMsg())) {
-                                                wsMap.putIfAbsent(dialog.getFid(), ws);
-                                                logger.info("conn " + dialog.getFid() + " is create");
-                                            } else {
-                                                logger.info("conn " + dialog.getTid() + " receive msg: "
-                                                            + dialog.getMsg() + " from conn " + dialog.getFid());
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    } catch (Exception e) {
-                        logger.error(e.getMessage());
-                    }
-                }
-
-                client.close();
-                verticle.getContainer().exit();
-            }
-        };
-        t.start();
+                                                                                                                      }
+                                                                                                                  });
+        // final Verticle verticle = this;
+        //
+        // Thread t = new Thread() {
+        //
+        // @Override
+        // public void run() {
+        // BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        // while (true) {
+        // try {
+        // String cmdStr = reader.readLine();
+        // Cmd cmd = new Gson().fromJson(cmdStr, Cmd.class);
+        // Preconditions.checkNotNull(Strings.nullToEmpty(cmd.getCmd()));
+        //
+        // if (Objects.equal("quit", cmd.getCmd())) {
+        // break;
+        // } else if (Objects.equal("send", cmd.getCmd())) {
+        // Preconditions.checkArgument(cmd.getFid() > 0);
+        // Preconditions.checkArgument(cmd.getTid() > 0);
+        // Preconditions.checkArgument(cmd.getFid() != cmd.getTid());
+        // Preconditions.checkNotNull(wsMap.get(cmd.getFid()));
+        // Preconditions.checkNotNull(Strings.emptyToNull(cmd.getMsg()));
+        //
+        // Dialog dialog = new Dialog();
+        // dialog.setFid(cmd.getFid());
+        // dialog.setTid(cmd.getTid());
+        // dialog.setMsg(cmd.getMsg());
+        //
+        // logger.info("send msg: " + dialog.getFid() + ", from conn " + dialog.getFid()
+        // + ", to conn " + dialog.getTid());
+        //
+        // wsMap.get(cmd.getFid()).writeTextFrame(cmdStr);
+        // } else if (Objects.equal("create", cmd.getCmd())) {
+        // client.connectWebsocket("/", new Handler<WebSocket>() {
+        //
+        // @Override
+        // public void handle(final WebSocket ws) {
+        // ws.dataHandler(new Handler<Buffer>() {
+        //
+        // @Override
+        // public void handle(Buffer buf) {
+        // Dialog dialog = new Gson().fromJson(buf.toString(), Dialog.class);
+        // Preconditions.checkArgument(dialog.getFid() > 0);
+        //
+        // if (Strings.isNullOrEmpty(dialog.getMsg())) {
+        // wsMap.putIfAbsent(dialog.getFid(), ws);
+        // logger.info("conn " + dialog.getFid() + " is create");
+        // } else {
+        // logger.info("conn " + dialog.getTid() + " receive msg: "
+        // + dialog.getMsg() + " from conn " + dialog.getFid());
+        // }
+        // }
+        // });
+        // }
+        // });
+        // }
+        // } catch (Exception e) {
+        // logger.error(e.getMessage());
+        // }
+        // }
+        //
+        // client.close();
+        // verticle.getContainer().exit();
+        // }
+        // };
+        // t.start();
     }
 }
