@@ -6,6 +6,7 @@
 package me.mayou.weblw.chat;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -37,15 +38,22 @@ public class ChatClient extends Verticle {
 
     @Override
     public void start() {
-        final HttpClient client = vertx.createHttpClient().setHost("10.125.48.74").setPort(9999).connectWebsocket("/",
-                                                                                                                  new Handler<WebSocket>() {
+        final HttpClient client = vertx.createHttpClient().setHost("10.125.48.74").setPort(9999);
+        while (true) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+            try {
+                reader.readLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            client.connectWebsocket("/", new Handler<WebSocket>() {
 
-                                                                                                                      @Override
-                                                                                                                      public void handle(WebSocket event){
-                                                                                                                          event.writeTextFrame("hello");
-
-                                                                                                                      }
-                                                                                                                  });
+                @Override
+                public void handle(WebSocket event) {
+                    logger.info("websocket create");
+                }
+            });
+        }
         // final Verticle verticle = this;
         //
         // Thread t = new Thread() {
