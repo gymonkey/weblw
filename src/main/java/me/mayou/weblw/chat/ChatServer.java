@@ -57,7 +57,7 @@ public class ChatServer extends Verticle {
                 dialog.setFid(connId);
                 ws.writeTextFrame(new Gson().toJson(dialog));
                 
-                wsMap.put(connId, ws);
+//                wsMap.put(connId, ws);
             }
         }).listen(9999, new Handler<AsyncResult<HttpServer>>() {
 
