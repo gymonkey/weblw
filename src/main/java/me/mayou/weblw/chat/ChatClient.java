@@ -69,7 +69,7 @@ public class ChatClient extends Verticle {
                             logger.info("send msg: " + dialog.getFid() + ", from conn " + dialog.getFid()
                                         + ", to conn " + dialog.getTid());
 
-                            wsMap.get(cmd.getFid()).writeTextFrame(cmdStr);
+                            wsMap.get(cmd.getFid()).writeTextFrame(new Gson().toJson(dialog));
                         } else if (Objects.equal("create", cmd.getCmd())) {
                             client.connectWebsocket("/", new Handler<WebSocket>() {
 
