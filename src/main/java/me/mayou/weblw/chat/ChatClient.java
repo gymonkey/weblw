@@ -66,7 +66,7 @@ public class ChatClient extends Verticle {
                             dialog.setTid(cmd.getTid());
                             dialog.setMsg(cmd.getMsg());
 
-                            logger.info("send msg: " + dialog.getFid() + ", from conn " + dialog.getFid()
+                            logger.info("send msg: " + dialog.getMsg() + ", from conn " + dialog.getFid()
                                         + ", to conn " + dialog.getTid());
 
                             wsMap.get(cmd.getFid()).writeTextFrame(new Gson().toJson(dialog));
