@@ -7,6 +7,7 @@ package me.mayou.weblw.timer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.slf4j.Logger;
@@ -55,28 +56,31 @@ public class Timer {
     }
 
     private void init() {
+        for(int idx = 0; idx < 6; ++idx){
+            ring.add(new ConcurrentHashMap<Integer, ServerConn>());
+        }
+        
         Thread timerThread = new Thread("timer-thread") {
 
             @Override
             public void run() {
                 try {
-                    Thread.sleep(60000L);
-
                     while (true) {
+                        Thread.sleep(10000L);
+                        
                         ConcurrentMap<Integer, ServerConn> conns = ring.get(head.get());
 
-                        if (conns != null) {
+                        if (conns != null && !conns.isEmpty()) {
                             for (ServerConn conn : conns.values()) {
                                 logger.error("conn " + conn.getId() + " timeout! After " + head.getRound() * 60 + "s!");
                             }
-                        }else{
-                            logger.info("conns is null");;
+                        } else {
+                            logger.info("conns is null");
+                            ;
                         }
 
                         head.increamentAndGet();
                         tail.increamentAndGet();
-
-                        Thread.sleep(10000L);
                     }
                 } catch (InterruptedException e) {
                     // ignore
