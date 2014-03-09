@@ -31,7 +31,7 @@ public class CreateMsg extends Msg {
     
     @Override
     protected boolean isMyJob(String msg) {
-        return Objects.equal("create", msg);
+        return Objects.equal("{cmd:\"create\"}", msg);
     }
 
     @SuppressWarnings("unchecked")

@@ -38,7 +38,7 @@ public class ChatServer extends Verticle {
                         chain.process(ws, buf.toString());
                     }
                 });
-                chain.process(ws, "create");
+                chain.process(ws, "{cmd:\"create\"}");
             }
         }).listen(9999, new Handler<AsyncResult<HttpServer>>() {
 
