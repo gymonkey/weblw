@@ -65,8 +65,12 @@ public class Timer {
                     while (true) {
                         ConcurrentMap<Integer, ServerConn> conns = ring.get(head.get());
 
-                        for (ServerConn conn : conns.values()) {
-                            logger.error("conn " + conn.getId() + " timeout! After " + head.getRound() * 60 + "s!");
+                        if (conns != null) {
+                            for (ServerConn conn : conns.values()) {
+                                logger.error("conn " + conn.getId() + " timeout! After " + head.getRound() * 60 + "s!");
+                            }
+                        }else{
+                            logger.info("conns is null");;
                         }
 
                         head.increamentAndGet();

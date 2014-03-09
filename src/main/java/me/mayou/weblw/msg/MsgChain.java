@@ -36,6 +36,7 @@ public class MsgChain {
         Context ctx = new ContextBase();
         ctx.put(Msg.CMD, cmd);
         ctx.put(Msg.PARAM, conns);
+        ctx.put(Msg.IN_CONN, ws);
         
         try {
             msgChain.execute(ctx);
