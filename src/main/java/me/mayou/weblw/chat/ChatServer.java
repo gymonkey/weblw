@@ -5,11 +5,7 @@
  */
 package me.mayou.weblw.chat;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import me.mayou.weblw.dialog.Dialog;
+import me.mayou.weblw.msg.MsgChain;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +14,7 @@ import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpServer;
 import org.vertx.java.core.http.ServerWebSocket;
-import org.vertx.java.core.json.JsonObject;
 import org.vertx.java.platform.Verticle;
-
-import com.google.gson.Gson;
 
 /**
  * @author mayou.lyt
@@ -29,10 +22,8 @@ import com.google.gson.Gson;
 public class ChatServer extends Verticle {
 
     private static final Logger                           logger = LoggerFactory.getLogger(ChatServer.class);
-
-    private ConcurrentMap<Integer, ServerWebSocket> wsMap  = new ConcurrentHashMap<Integer, ServerWebSocket>();
-
-    private AtomicInteger idGenerator = new AtomicInteger();
+    
+    private MsgChain chain = new MsgChain();
     
     @Override
     public void start() {
@@ -44,20 +35,10 @@ public class ChatServer extends Verticle {
 
                     @Override
                     public void handle(Buffer buf) {
-                        Dialog dialog = new Gson().fromJson(buf.toString(), Dialog.class);
-                        logger.info("receive msg: " + dialog.getMsg() + " from conn " + dialog.getFid()
-                                    + ", now send msg to conn " + dialog.getTid());
-
-                        wsMap.get(dialog.getTid()).writeTextFrame(buf.toString());
+                        chain.process(ws, buf.toString());
                     }
                 });
-                
-                int connId = idGenerator.incrementAndGet();
-                Dialog dialog = new Dialog();
-                dialog.setFid(connId);
-                ws.writeTextFrame(new Gson().toJson(dialog));
-                
-                wsMap.put(connId, ws);
+                chain.process(ws, "create");
             }
         }).listen(9999, new Handler<AsyncResult<HttpServer>>() {
 

@@ -6,13 +6,12 @@
 package me.mayou.weblw.chat;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import me.mayou.weblw.cmd.Cmd;
-import me.mayou.weblw.dialog.Dialog;
+import me.mayou.weblw.packet.Packet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,21 +54,21 @@ public class ChatClient extends Verticle {
                         if (Objects.equal("quit", cmd.getCmd())) {
                             break;
                         } else if (Objects.equal("send", cmd.getCmd())) {
-                            Preconditions.checkArgument(cmd.getFid() > 0);
-                            Preconditions.checkArgument(cmd.getTid() > 0);
-                            Preconditions.checkArgument(cmd.getFid() != cmd.getTid());
-                            Preconditions.checkNotNull(wsMap.get(cmd.getFid()));
-                            Preconditions.checkNotNull(Strings.emptyToNull(cmd.getMsg()));
+//                            Preconditions.checkArgument(cmd.getFid() > 0);
+//                            Preconditions.checkArgument(cmd.getTid() > 0);
+//                            Preconditions.checkArgument(cmd.getFid() != cmd.getTid());
+//                            Preconditions.checkNotNull(wsMap.get(cmd.getFid()));
+//                            Preconditions.checkNotNull(Strings.emptyToNull(cmd.getMsg()));
+//
+//                            Dialog dialog = new Dialog();
+//                            dialog.setFid(cmd.getFid());
+//                            dialog.setTid(cmd.getTid());
+//                            dialog.setMsg(cmd.getMsg());
 
-                            Dialog dialog = new Dialog();
-                            dialog.setFid(cmd.getFid());
-                            dialog.setTid(cmd.getTid());
-                            dialog.setMsg(cmd.getMsg());
-
-                            logger.info("send msg: " + dialog.getMsg() + ", from conn " + dialog.getFid()
-                                        + ", to conn " + dialog.getTid());
-
-                            wsMap.get(cmd.getFid()).writeTextFrame(new Gson().toJson(dialog));
+//                            logger.info("send msg: " + dialog.getMsg() + ", from conn " + dialog.getFid()
+//                                        + ", to conn " + dialog.getTid());
+//
+//                            wsMap.get(cmd.getFid()).writeTextFrame(new Gson().toJson(dialog));
                         } else if (Objects.equal("create", cmd.getCmd())) {
                             client.connectWebsocket("/", new Handler<WebSocket>() {
 
@@ -79,7 +78,7 @@ public class ChatClient extends Verticle {
 
                                         @Override
                                         public void handle(Buffer buf) {
-                                            Dialog dialog = new Gson().fromJson(buf.toString(), Dialog.class);
+                                            Packet dialog = new Gson().fromJson(buf.toString(), Packet.class);
                                             Preconditions.checkArgument(dialog.getFid() > 0);
 
                                             if (Strings.isNullOrEmpty(dialog.getMsg())) {
