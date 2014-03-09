@@ -20,7 +20,7 @@ class RollingNumber {
 
     RollingNumber(int count, int roll){
         Preconditions.checkArgument(roll > 0);
-        Preconditions.checkArgument(count > 0);
+        Preconditions.checkArgument(count >= 0);
         this.roll = roll;
         this.count = count;
     }
