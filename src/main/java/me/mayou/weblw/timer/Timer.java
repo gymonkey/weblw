@@ -66,12 +66,12 @@ public class Timer {
                         ConcurrentMap<Integer, ServerConn> conns = ring.get(head.get());
 
                         for (ServerConn conn : conns.values()) {
-                            logger.error("conn " + conn.getId() + " timeout!");
+                            logger.error("conn " + conn.getId() + " timeout! After " + head.getRound() * 60 + "s!");
                         }
-                        
+
                         head.increamentAndGet();
                         tail.increamentAndGet();
-                        
+
                         Thread.sleep(10000L);
                     }
                 } catch (InterruptedException e) {
