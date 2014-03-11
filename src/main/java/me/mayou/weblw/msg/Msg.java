@@ -7,10 +7,10 @@
  */
 package me.mayou.weblw.msg;
 
-import me.mayou.weblw.conn.ServerConn;
-
 import org.apache.commons.chain.Command;
 import org.apache.commons.chain.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -20,6 +20,8 @@ import com.google.common.base.Strings;
  */
 public abstract class Msg implements Command{
 
+    static final Logger logger = LoggerFactory.getLogger(Msg.class);
+    
     static final String CMD = "command";
     
     static final String PARAM = "param";

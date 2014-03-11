@@ -10,7 +10,6 @@ package me.mayou.weblw.msg;
 import java.util.Map;
 
 import org.apache.commons.chain.Context;
-import org.vertx.java.core.http.ServerWebSocket;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
