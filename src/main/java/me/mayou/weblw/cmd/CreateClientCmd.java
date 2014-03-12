@@ -34,7 +34,7 @@ public class CreateClientCmd extends ClientCmd {
 
     @Override
     protected boolean isMyJob(String cmd) {
-        return Objects.equal("send", new Gson().fromJson(cmd, Packet.class).getCmd());
+        return Objects.equal("create", new Gson().fromJson(cmd, Packet.class).getCmd());
     }
 
     @Override
