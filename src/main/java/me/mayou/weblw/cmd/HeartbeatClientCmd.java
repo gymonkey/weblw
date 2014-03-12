@@ -59,12 +59,12 @@ public class HeartbeatClientCmd extends ClientCmd {
 
     @Override
     protected boolean isMyJob(String cmd) {
-        return Objects.equal("heartbeat", new Gson().fromJson(cmd, Packet.class));
+        return Objects.equal("heartbeat", new Gson().fromJson(cmd, Packet.class).getCmd());
     }
 
     @Override
     protected void execute0(Context ctx) throws Exception {
-        if(isStart.compareAndSet(false, true)){
+        if (isStart.compareAndSet(false, true)) {
             heartbeatThread.start();
         }
     }
