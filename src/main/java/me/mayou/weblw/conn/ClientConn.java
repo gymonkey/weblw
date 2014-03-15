@@ -7,6 +7,8 @@
  */
 package me.mayou.weblw.conn;
 
+import io.netty.util.Timeout;
+
 import org.vertx.java.core.http.WebSocket;
 
 /**
@@ -17,6 +19,8 @@ public class ClientConn {
     private int id;
     
     private WebSocket ws;
+    
+    private Timeout timeout;
     
     public int getId() {
         return id;
@@ -32,6 +36,14 @@ public class ClientConn {
     
     public void setWs(WebSocket ws) {
         this.ws = ws;
+    }
+
+    public Timeout getTimeout() {
+        return timeout;
+    }
+    
+    public void setTimeout(Timeout timeout) {
+        this.timeout = timeout;
     }
     
 }

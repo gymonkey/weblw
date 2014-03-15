@@ -3,7 +3,7 @@
  * Alibaba.com ("Confidential Information"). You shall not disclose such Confidential Information and shall use it only
  * in accordance with the terms of the license agreement you entered into with Alibaba.com.
  */
-package me.mayou.weblw.cmd;
+package me.mayou.weblw.response.cmd;
 
 import java.util.concurrent.ConcurrentMap;
 
@@ -19,25 +19,29 @@ import com.google.common.base.Preconditions;
 /**
  * @author mayou.lyt
  */
-public abstract class ClientCmd implements Command {
+public abstract class ResponseCmd implements Command {
 
-    static final Logger                         logger = LoggerFactory.getLogger(ClientCmd.class);
+    static final String                                PARAM   = "params";
 
-    public static final String                  CMD    = "cmd";
+    static final String                                IN_CONN = "inConn";
 
-    protected final ConcurrentMap<Integer, ClientConn> wsMap;
+    protected static final Logger                      logger  = LoggerFactory.getLogger(ResponseCmd.class);
 
-    ClientCmd(ConcurrentMap<Integer, ClientConn> wsMap){
-        this.wsMap = Preconditions.checkNotNull(wsMap);
+    protected final ConcurrentMap<Integer, ClientConn> conns;
+
+    ResponseCmd(ConcurrentMap<Integer, ClientConn> conns){
+        this.conns = Preconditions.checkNotNull(conns);
     }
 
     protected abstract boolean isMyJob(String cmd);
 
-    protected abstract void execute0(Context ctx) throws Exception;
+    protected abstract void execute0(Context ctx);
 
     @Override
     public boolean execute(Context context) throws Exception {
-        if (isMyJob((String) context.get(CMD))) {
+        String params = Preconditions.checkNotNull((String) context.get(PARAM));
+
+        if (isMyJob(params)) {
             execute0(context);
             return PROCESSING_COMPLETE;
         } else {

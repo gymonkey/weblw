@@ -5,10 +5,13 @@
  */
 package me.mayou.weblw.cmd;
 
+import io.netty.util.Timer;
+
 import java.util.concurrent.ConcurrentMap;
 
 import me.mayou.weblw.conn.ClientConn;
 import me.mayou.weblw.packet.Packet;
+import me.mayou.weblw.response.cmd.ResponseCmdChain;
 
 import org.apache.commons.chain.Context;
 import org.vertx.java.core.Handler;
@@ -25,11 +28,14 @@ import com.google.gson.Gson;
  */
 public class CreateClientCmd extends ClientCmd {
 
-    private HttpClient client;
+    private HttpClient       client;
 
-    CreateClientCmd(ConcurrentMap<Integer, ClientConn> wsMap, HttpClient client){
+    private ResponseCmdChain chain;
+
+    CreateClientCmd(ConcurrentMap<Integer, ClientConn> wsMap, HttpClient client, Timer timer){
         super(wsMap);
         this.client = Preconditions.checkNotNull(client);
+        chain = new ResponseCmdChain(wsMap, timer);
     }
 
     @Override
@@ -47,20 +53,7 @@ public class CreateClientCmd extends ClientCmd {
 
                     @Override
                     public void handle(Buffer buf) {
-                        Packet packet = new Gson().fromJson(buf.toString(), Packet.class);
-
-                        if (Objects.equal("create", packet.getCmd())) {
-                            ClientConn conn = new ClientConn();
-                            conn.setId(packet.getFid());
-                            conn.setWs(ws);
-
-                            wsMap.put(packet.getFid(), conn);
-
-                            logger.info("conn " + conn.getId() + " is created");
-                        } else {
-                            logger.info("recceive msg: " + packet.getMsg() + " from conn " + packet.getFid()
-                                        + " to conn " + packet.getTid());
-                        }
+                        chain.execute(buf.toString(), ws);
                     }
                 });
             }

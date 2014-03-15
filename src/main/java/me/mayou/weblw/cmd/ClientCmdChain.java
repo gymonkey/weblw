@@ -5,6 +5,9 @@
  */
 package me.mayou.weblw.cmd;
 
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timer;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,9 +32,10 @@ public class ClientCmdChain {
 
     public ClientCmdChain(HttpClient client, AtomicBoolean isStart){
         ConcurrentMap<Integer, ClientConn> wsMap = new ConcurrentHashMap<Integer, ClientConn>();
+        
+        Timer timer = new HashedWheelTimer();
 
-        cmdChain.addCommand(new CreateClientCmd(wsMap, client));
-        cmdChain.addCommand(new HeartbeatClientCmd(wsMap));
+        cmdChain.addCommand(new CreateClientCmd(wsMap, client, timer));
         cmdChain.addCommand(new QuitClientCmd(wsMap, isStart));
         cmdChain.addCommand(new SendClientCmd(wsMap));
     }
