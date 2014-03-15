@@ -5,12 +5,20 @@
  */
 package me.mayou.weblw.msg;
 
+import io.netty.util.Timeout;
+import io.netty.util.Timer;
+import io.netty.util.TimerTask;
+
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.chain.Context;
 import org.vertx.java.core.http.ServerWebSocket;
 
+import me.mayou.weblw.conn.ServerConn;
 import me.mayou.weblw.packet.Packet;
+
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
@@ -20,23 +28,39 @@ import com.google.gson.Gson;
  */
 public class ImMsg extends Msg {
 
+    private ConcurrentMap<Integer, ServerConn> conns;
+
+    private Timer                              timer;
+
+    ImMsg(ConcurrentMap<Integer, ServerConn> conns, Timer timer){
+        this.conns = Preconditions.checkNotNull(conns);
+        this.timer = Preconditions.checkNotNull(timer);
+    }
+
     @Override
     protected boolean isMyJob(String msg) {
         Packet packet = new Gson().fromJson(msg, Packet.class);
         return Objects.equal("send", packet.getCmd());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void execute0(Context ctx, String cmd) throws Exception {
-        Map<Integer, ServerWebSocket> conns = (Map<Integer, ServerWebSocket>) ctx.get(Msg.PARAM);
+        final Packet packet = new Gson().fromJson(cmd, Packet.class);
 
-        Packet packet = new Gson().fromJson(cmd, Packet.class);
+        final ServerConn conn = Preconditions.checkNotNull(conns.get(packet.getTid()));
+        conn.getWs().writeTextFrame(cmd);
+        conn.getTimeout().cancel();
 
-        ServerWebSocket toConn = conns.get(packet.getTid());
-        Preconditions.checkNotNull(toConn);
+        Timeout timeout = timer.newTimeout(new TimerTask() {
 
-        toConn.writeTextFrame(cmd);
+            @Override
+            public void run(Timeout timeout) throws Exception {
+                logger.info("conn " + packet.getFid() + " has not receive any data in last 60s, now we close it");
+                conn.getWs().close();
+                conns.remove(packet.getFid());
+            }
+        }, 60, TimeUnit.SECONDS);
+        conn.setTimeout(timeout);
 
         logger.info("receive msg: " + packet.getMsg() + " from conn " + packet.getFid() + " to conn " + packet.getTid());
     }
