@@ -61,6 +61,8 @@ public class CreateResponseCmd extends ResponseCmd {
             }
         }, 30, TimeUnit.SECONDS);
         conn.setTimeout(timeout);
+        
+        conns.put(conn.getId(), conn);
 
         logger.info("conn " + conn.getId() + " is created");
     }
