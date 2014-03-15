@@ -36,7 +36,7 @@ public class ClientCmdChain {
         Timer timer = new HashedWheelTimer();
 
         cmdChain.addCommand(new CreateClientCmd(wsMap, client, timer));
-        cmdChain.addCommand(new QuitClientCmd(wsMap, isStart));
+        cmdChain.addCommand(new QuitClientCmd(wsMap, isStart, timer));
         cmdChain.addCommand(new SendClientCmd(wsMap));
     }
     

@@ -7,6 +7,8 @@
  */
 package me.mayou.weblw.cmd;
 
+import io.netty.util.Timer;
+
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -27,9 +29,12 @@ public class QuitClientCmd extends ClientCmd {
 
     private AtomicBoolean isStart;
     
-    QuitClientCmd(ConcurrentMap<Integer, ClientConn> wsMap, AtomicBoolean isStart){
+    private Timer timer;
+    
+    QuitClientCmd(ConcurrentMap<Integer, ClientConn> wsMap, AtomicBoolean isStart, Timer timer){
         super(wsMap);
         this.isStart = Preconditions.checkNotNull(isStart);
+        this.timer = Preconditions.checkNotNull(timer);
     }
     
     @Override
@@ -40,6 +45,7 @@ public class QuitClientCmd extends ClientCmd {
     @Override
     protected void execute0(Context ctx) throws Exception {
         isStart.set(false);
+        timer.stop();
         logger.info("client is soon to be shut down");
     }
 
