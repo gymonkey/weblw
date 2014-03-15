@@ -26,7 +26,7 @@ public class ResponseCmdChain {
 
     public ResponseCmdChain(ConcurrentMap<Integer, ClientConn> conns, Timer timer){
         cmdChain.addCommand(new CreateResponseCmd(conns, timer));
-        cmdChain.addCommand(new HeartbeatResponseCmd(conns));
+        cmdChain.addCommand(new HeartbeatResponseCmd(conns, timer));
         cmdChain.addCommand(new ImResponseCmd(conns));
     }
 
