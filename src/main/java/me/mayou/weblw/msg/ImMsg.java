@@ -9,12 +9,10 @@ import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.chain.Context;
-import org.vertx.java.core.http.ServerWebSocket;
 
 import me.mayou.weblw.conn.ServerConn;
 import me.mayou.weblw.packet.Packet;
@@ -47,20 +45,26 @@ public class ImMsg extends Msg {
     protected void execute0(Context ctx, String cmd) throws Exception {
         final Packet packet = new Gson().fromJson(cmd, Packet.class);
 
-        final ServerConn conn = Preconditions.checkNotNull(conns.get(packet.getTid()));
-        conn.getWs().writeTextFrame(cmd);
-        conn.getTimeout().cancel();
+        ServerConn tConn = Preconditions.checkNotNull(conns.get(packet.getTid()));
+        tConn.getWs().writeTextFrame(cmd);
+
+        final ServerConn fConn = Preconditions.checkNotNull(conns.get(packet.getFid()));
+        fConn.getTimeout().cancel();
 
         Timeout timeout = timer.newTimeout(new TimerTask() {
 
             @Override
             public void run(Timeout timeout) throws Exception {
                 logger.info("conn " + packet.getFid() + " has not receive any data in last 60s, now we close it");
-                conn.getWs().close();
+                try {
+                    fConn.getWs().close();
+                } catch (IllegalStateException e) {
+                    logger.info("conn " + fConn.getId() + " has been closed");
+                }
                 conns.remove(packet.getFid());
             }
         }, 60, TimeUnit.SECONDS);
-        conn.setTimeout(timeout);
+        fConn.setTimeout(timeout);
 
         logger.info("receive msg: " + packet.getMsg() + " from conn " + packet.getFid() + " to conn " + packet.getTid());
     }
