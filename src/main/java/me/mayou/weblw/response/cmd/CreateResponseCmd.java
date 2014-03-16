@@ -46,11 +46,28 @@ public class CreateResponseCmd extends ResponseCmd {
         final ClientConn conn = new ClientConn();
         conn.setId(packet.getFid());
         conn.setWs(Preconditions.checkNotNull((WebSocket) ctx.get(IN_CONN)));
+        conn.setLastOpTime(System.currentTimeMillis());
+        conns.put(conn.getId(), conn);
 
-        Timeout timeout = timer.newTimeout(new TimerTask() {
+        timer.newTimeout(new CheckTask(timer, conn), 30, TimeUnit.SECONDS);
 
-            @Override
-            public void run(Timeout timeout) throws Exception {
+        logger.info("conn " + conn.getId() + " is created");
+    }
+
+    private static class CheckTask implements TimerTask {
+
+        private Timer      timer;
+
+        private ClientConn conn;
+
+        public CheckTask(Timer timer, ClientConn conn){
+            this.timer = Preconditions.checkNotNull(timer);
+            this.conn = Preconditions.checkNotNull(conn);
+        }
+
+        @Override
+        public void run(Timeout timeout) throws Exception {
+            if (System.currentTimeMillis() - conn.getLastOpTime() >= 30 * 1000) {
                 logger.info("conn " + conn.getId() + " send heartbeat to server");
 
                 Packet sendPacket = new Packet();
@@ -58,13 +75,10 @@ public class CreateResponseCmd extends ResponseCmd {
                 sendPacket.setFid(conn.getId());
 
                 conn.getWs().writeTextFrame(new Gson().toJson(sendPacket));
+                conn.setLastOpTime(System.currentTimeMillis());
             }
-        }, 30, TimeUnit.SECONDS);
-        conn.setTimeout(timeout);
-        
-        conns.put(conn.getId(), conn);
-
-        logger.info("conn " + conn.getId() + " is created");
+            timer.newTimeout(this, 30, TimeUnit.SECONDS);
+        }
     }
 
 }
