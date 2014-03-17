@@ -23,7 +23,11 @@ public class ChatServer extends Verticle {
 
     private static final Logger                           logger = LoggerFactory.getLogger(ChatServer.class);
     
-    private MsgChain chain = new MsgChain();
+    private MsgChain chain;
+    
+    public ChatServer(){
+        chain = new MsgChain(getVertx());
+    }
     
     @Override
     public void start() {

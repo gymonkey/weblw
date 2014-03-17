@@ -5,18 +5,15 @@
  */
 package me.mayou.weblw.msg;
 
-import io.netty.util.Timeout;
-import io.netty.util.Timer;
-import io.netty.util.TimerTask;
-
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import me.mayou.weblw.conn.ServerConn;
 import me.mayou.weblw.packet.Packet;
 
 import org.apache.commons.chain.Context;
+import org.vertx.java.core.Handler;
+import org.vertx.java.core.Vertx;
 import org.vertx.java.core.http.ServerWebSocket;
 
 import com.google.common.base.Objects;
@@ -28,15 +25,15 @@ import com.google.gson.Gson;
  */
 public class CreateMsg extends Msg {
 
-    private AtomicInteger                      ids = new AtomicInteger(0);
+    private final AtomicInteger                      ids = new AtomicInteger(0);
 
-    private Timer                              timer;
+    private final ConcurrentMap<Integer, ServerConn> conns;
 
-    private ConcurrentMap<Integer, ServerConn> conns;
+    private final Vertx                              vertx;
 
-    CreateMsg(ConcurrentMap<Integer, ServerConn> conns, Timer timer){
-        this.timer = Preconditions.checkNotNull(timer);
+    CreateMsg(ConcurrentMap<Integer, ServerConn> conns, Vertx vertx){
         this.conns = Preconditions.checkNotNull(conns);
+        this.vertx = Preconditions.checkNotNull(vertx);
     }
 
     @Override
@@ -52,20 +49,36 @@ public class CreateMsg extends Msg {
         packet.setCmd("create");
         packet.setFid(ids.incrementAndGet());
 
-        Timeout timeout = timer.newTimeout(new TimerTask() {
-
-            @Override
-            public void run(Timeout timeout) throws Exception {
-                logger.info("conn " + packet.getFid() + " has not receive any data in last 60s, now we close it");
-                ws.close();
-                conns.remove(packet.getFid());
-            }
-        }, 60, TimeUnit.SECONDS);
-
-        ServerConn conn = new ServerConn();
+        final ServerConn conn = new ServerConn();
         conn.setId(packet.getFid());
         conn.setWs(ws);
-        conn.setTimeout(timeout);
+        conn.setReadOpsTime(System.currentTimeMillis());
+        long timerId = vertx.setPeriodic(60000, new Handler<Long>() {
+
+            @Override
+            public void handle(Long timerId) {
+                if (System.currentTimeMillis() - conn.getReadOpsTime() >= 60000) {
+                    conns.remove(conn.getId());
+                    try {
+                        conn.getWs().close();
+                    } catch (IllegalStateException e) {
+                        logger.info("conn " + conn.getId() + " has been closed");
+                    }
+                    logger.info("we have not receive any data from conn " + conn.getId() + ", now we close it");
+                    vertx.cancelTimer(conn.getTimerId());
+                }
+            }
+        });
+        conn.getWs().closeHandler(new Handler<Void>() {
+
+            @Override
+            public void handle(Void event) {
+                vertx.cancelTimer(conn.getTimerId());
+                logger.info("conn " + conn.getId() + " has been closed");
+            }
+        });
+        conn.setTimerId(timerId);
+
         conns.put(packet.getFid(), conn);
 
         ws.writeTextFrame(new Gson().toJson(packet));

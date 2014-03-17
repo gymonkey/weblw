@@ -11,7 +11,9 @@ package me.mayou.weblw.packet;
  * @author mayou.lyt
  */
 public class Packet {
-
+    
+    private long id;
+    
     private String cmd;
     
     private int fid;
@@ -50,6 +52,14 @@ public class Packet {
     
     public void setMsg(String msg) {
         this.msg = msg;
+    }
+    
+    public long getId() {
+        return id;
+    }
+    
+    public void setId(long id) {
+        this.id = id;
     }
     
 }

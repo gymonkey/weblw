@@ -34,7 +34,7 @@ public class ChatClient extends Verticle {
 
             @Override
             public void run() {
-                ClientCmdChain chain = new ClientCmdChain(client, isStart);
+                ClientCmdChain chain = new ClientCmdChain(client, isStart, getVertx());
                 BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
                 while (isStart.get()) {
                     try {

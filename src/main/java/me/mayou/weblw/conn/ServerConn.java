@@ -7,8 +7,6 @@
  */
 package me.mayou.weblw.conn;
 
-import io.netty.util.Timeout;
-
 import org.vertx.java.core.http.ServerWebSocket;
 
 /**
@@ -20,7 +18,9 @@ public class ServerConn {
     
     private ServerWebSocket ws;
     
-    private Timeout timeout;
+    private long timerId;
+    
+    private volatile long readOpsTime;
     
     public int getId() {
         return id;
@@ -37,13 +37,21 @@ public class ServerConn {
     public void setWs(ServerWebSocket ws) {
         this.ws = ws;
     }
-  
-    public Timeout getTimeout() {
-        return timeout;
+
+    public long getReadOpsTime() {
+        return readOpsTime;
     }
     
-    public void setTimeout(Timeout timeout) {
-        this.timeout = timeout;
+    public void setReadOpsTime(long readOpsTime) {
+        this.readOpsTime = readOpsTime;
+    }
+
+    public long getTimerId() {
+        return timerId;
+    }
+    
+    public void setTimerId(long timerId) {
+        this.timerId = timerId;
     }
     
 }

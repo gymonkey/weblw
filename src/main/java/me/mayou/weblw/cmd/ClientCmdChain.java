@@ -5,9 +5,6 @@
  */
 package me.mayou.weblw.cmd;
 
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.Timer;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,6 +15,7 @@ import org.apache.commons.chain.Chain;
 import org.apache.commons.chain.Context;
 import org.apache.commons.chain.impl.ChainBase;
 import org.apache.commons.chain.impl.ContextBase;
+import org.vertx.java.core.Vertx;
 import org.vertx.java.core.http.HttpClient;
 
 import com.google.common.base.Preconditions;
@@ -30,13 +28,11 @@ public class ClientCmdChain {
 
     private final Chain cmdChain = new ChainBase();
 
-    public ClientCmdChain(HttpClient client, AtomicBoolean isStart){
+    public ClientCmdChain(HttpClient client, AtomicBoolean isStart, Vertx vertx){
         ConcurrentMap<Integer, ClientConn> wsMap = new ConcurrentHashMap<Integer, ClientConn>();
-        
-        Timer timer = new HashedWheelTimer();
 
-        cmdChain.addCommand(new CreateClientCmd(wsMap, client, timer));
-        cmdChain.addCommand(new QuitClientCmd(wsMap, isStart, timer));
+        cmdChain.addCommand(new CreateClientCmd(wsMap, client, vertx));
+        cmdChain.addCommand(new QuitClientCmd(wsMap, isStart));
         cmdChain.addCommand(new SendClientCmd(wsMap));
     }
     

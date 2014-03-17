@@ -36,8 +36,9 @@ public class SendClientCmd extends ClientCmd {
 
         Packet packet = new Gson().fromJson(cmd, Packet.class);
         ClientConn conn = Preconditions.checkNotNull(wsMap.get(packet.getFid()));
-        conn.getWs().writeTextFrame(cmd);
-        conn.setLastOpTime(System.currentTimeMillis());
+        packet.setId(conn.getNextPacketId());
+        conn.getWs().writeTextFrame(new Gson().toJson(packet));
+        conn.setLastWriteTime(System.currentTimeMillis());
 
         logger.info("send msg: " + packet.getMsg() + " from conn " + packet.getFid() + " to conn " + packet.getTid());
     }

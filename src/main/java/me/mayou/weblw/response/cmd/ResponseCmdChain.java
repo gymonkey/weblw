@@ -5,8 +5,6 @@
  */
 package me.mayou.weblw.response.cmd;
 
-import io.netty.util.Timer;
-
 import java.util.concurrent.ConcurrentMap;
 
 import me.mayou.weblw.conn.ClientConn;
@@ -15,6 +13,7 @@ import org.apache.commons.chain.Chain;
 import org.apache.commons.chain.Context;
 import org.apache.commons.chain.impl.ChainBase;
 import org.apache.commons.chain.impl.ContextBase;
+import org.vertx.java.core.Vertx;
 import org.vertx.java.core.http.WebSocket;
 
 /**
@@ -24,10 +23,11 @@ public class ResponseCmdChain {
 
     private Chain cmdChain = new ChainBase();
 
-    public ResponseCmdChain(ConcurrentMap<Integer, ClientConn> conns, Timer timer){
-        cmdChain.addCommand(new CreateResponseCmd(conns, timer));
+    public ResponseCmdChain(ConcurrentMap<Integer, ClientConn> conns, Vertx vertx){
+        cmdChain.addCommand(new CreateResponseCmd(conns, vertx));
         cmdChain.addCommand(new HeartbeatResponseCmd(conns));
         cmdChain.addCommand(new ImResponseCmd(conns));
+        cmdChain.addCommand(new ImRespResponseCmd(conns));
     }
 
     @SuppressWarnings("unchecked")

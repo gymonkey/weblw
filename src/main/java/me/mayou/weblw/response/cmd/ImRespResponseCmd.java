@@ -19,16 +19,16 @@ import com.google.gson.Gson;
 /**
  * @author mayou.lyt
  */
-public class HeartbeatResponseCmd extends ResponseCmd {
+public class ImRespResponseCmd extends ResponseCmd {
 
-    HeartbeatResponseCmd(ConcurrentMap<Integer, ClientConn> conns){
+    ImRespResponseCmd(ConcurrentMap<Integer, ClientConn> conns){
         super(conns);
     }
 
     @Override
     protected boolean isMyJob(String cmd) {
         Packet packet = new Gson().fromJson(cmd, Packet.class);
-        return Objects.equal("heartbeat", packet.getCmd());
+        return Objects.equal("send_resp", packet.getCmd());
     }
 
     @Override
@@ -36,7 +36,7 @@ public class HeartbeatResponseCmd extends ResponseCmd {
         Packet packet = new Gson().fromJson((String) ctx.get(PARAM), Packet.class);
         ClientConn conn = Preconditions.checkNotNull(conns.get(packet.getFid()));
         conn.setLastReadTime(System.currentTimeMillis());
-        logger.info("conn " + packet.getFid() + " receive heartbeat response from server");
+        logger.info("conn " + conn.getId() + " has receive response from server");
     }
 
 }

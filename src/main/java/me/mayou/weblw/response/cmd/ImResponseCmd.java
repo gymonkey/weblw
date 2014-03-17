@@ -13,6 +13,7 @@ import me.mayou.weblw.packet.Packet;
 import org.apache.commons.chain.Context;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 
 /**
@@ -32,7 +33,9 @@ public class ImResponseCmd extends ResponseCmd {
 
     @Override
     protected void execute0(Context ctx) {
-        Packet packet = new Gson().fromJson((String)ctx.get(PARAM), Packet.class);       
+        Packet packet = new Gson().fromJson((String)ctx.get(PARAM), Packet.class); 
+        ClientConn tConn = Preconditions.checkNotNull(conns.get(packet.getTid()));
+        tConn.setLastReadTime(System.currentTimeMillis());
         logger.info("receive msg: " + packet.getMsg() + " from conn " + packet.getFid() + " to conn " + packet.getTid());
     }
 

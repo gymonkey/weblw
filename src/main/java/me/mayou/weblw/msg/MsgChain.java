@@ -5,9 +5,6 @@
  */
 package me.mayou.weblw.msg;
 
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.Timer;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -17,6 +14,7 @@ import org.apache.commons.chain.Chain;
 import org.apache.commons.chain.Context;
 import org.apache.commons.chain.impl.ChainBase;
 import org.apache.commons.chain.impl.ContextBase;
+import org.vertx.java.core.Vertx;
 import org.vertx.java.core.http.ServerWebSocket;
 
 /**
@@ -26,14 +24,12 @@ public class MsgChain {
 
     private ConcurrentMap<Integer, ServerConn> conns    = new ConcurrentHashMap<Integer, ServerConn>();
 
-    private Timer                              timer    = new HashedWheelTimer();
-
     private Chain                              msgChain = new ChainBase();
 
-    public MsgChain(){
-        msgChain.addCommand(new ImMsg(conns, timer));
-        msgChain.addCommand(new HeartbeatMsg(conns, timer));
-        msgChain.addCommand(new CreateMsg(conns, timer));
+    public MsgChain(Vertx vertx){
+        msgChain.addCommand(new ImMsg(conns));
+        msgChain.addCommand(new HeartbeatMsg(conns));
+        msgChain.addCommand(new CreateMsg(conns, vertx));
     }
 
     @SuppressWarnings("unchecked")

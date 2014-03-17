@@ -5,8 +5,6 @@
  */
 package me.mayou.weblw.cmd;
 
-import io.netty.util.Timer;
-
 import java.util.concurrent.ConcurrentMap;
 
 import me.mayou.weblw.conn.ClientConn;
@@ -15,6 +13,7 @@ import me.mayou.weblw.response.cmd.ResponseCmdChain;
 
 import org.apache.commons.chain.Context;
 import org.vertx.java.core.Handler;
+import org.vertx.java.core.Vertx;
 import org.vertx.java.core.buffer.Buffer;
 import org.vertx.java.core.http.HttpClient;
 import org.vertx.java.core.http.WebSocket;
@@ -32,10 +31,10 @@ public class CreateClientCmd extends ClientCmd {
 
     private ResponseCmdChain chain;
 
-    CreateClientCmd(ConcurrentMap<Integer, ClientConn> wsMap, HttpClient client, Timer timer){
+    CreateClientCmd(ConcurrentMap<Integer, ClientConn> wsMap, HttpClient client, Vertx vertx){
         super(wsMap);
         this.client = Preconditions.checkNotNull(client);
-        chain = new ResponseCmdChain(wsMap, timer);
+        chain = new ResponseCmdChain(wsMap, vertx);
     }
 
     @Override
