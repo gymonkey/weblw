@@ -25,12 +25,9 @@ public class ChatServer extends Verticle {
     
     private MsgChain chain;
     
-    public ChatServer(){
-        chain = new MsgChain(getVertx());
-    }
-    
     @Override
     public void start() {
+        chain = new MsgChain(vertx);
         vertx.createHttpServer().websocketHandler(new Handler<ServerWebSocket>() {
 
             @Override
