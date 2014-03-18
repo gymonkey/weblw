@@ -63,11 +63,11 @@ public class CreateResponseCmd extends ResponseCmd {
             }
         });
         conn.setHeartbeatTimerId(heartbeatTimerId);
-        long readIdleTimerId = vertx.setPeriodic(30000, new Handler<Long>() {
+        long readIdleTimerId = vertx.setPeriodic(60000, new Handler<Long>() {
 
             @Override
             public void handle(Long timerId) {
-                if (System.currentTimeMillis() - conn.getLastReadTime() >= 30000) {
+                if (System.currentTimeMillis() - conn.getLastReadTime() >= 60000) {
                     conns.remove(conn.getId());
                     try {
                         conn.getWs().close();
@@ -76,6 +76,7 @@ public class CreateResponseCmd extends ResponseCmd {
                     }
                     logger.info("conn " + conn.getId() + " has not receive from server, now we close it");
                     vertx.cancelTimer(conn.getReadIdleTimerId());
+                    vertx.cancelTimer(conn.getHeartbeatTimerId());
                 }
             }
         });
