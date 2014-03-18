@@ -84,6 +84,7 @@ public class CreateResponseCmd extends ResponseCmd {
 
             @Override
             public void handle(Void event) {
+                conns.remove(conn.getId());
                 vertx.cancelTimer(conn.getHeartbeatTimerId());
                 vertx.cancelTimer(conn.getReadIdleTimerId());
                 logger.info("conn " + conn.getId() + " is now closed");

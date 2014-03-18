@@ -43,6 +43,7 @@ public class ImMsg extends Msg {
         final ServerConn fConn = Preconditions.checkNotNull(conns.get(packet.getFid()));
         packet.setCmd("send_resp");
         fConn.getWs().writeTextFrame(new Gson().toJson(packet));
+        fConn.setReadOpsTime(System.currentTimeMillis());
 
         logger.info("receive msg: " + packet.getMsg() + " from conn " + packet.getFid() + " to conn " + packet.getTid());
     }
