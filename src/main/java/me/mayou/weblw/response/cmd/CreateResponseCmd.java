@@ -59,6 +59,8 @@ public class CreateResponseCmd extends ResponseCmd {
                     conn.getWs().writeTextFrame(new Gson().toJson(packet));
                     
                     conn.setLastWriteTime(System.currentTimeMillis());
+                }else{
+                    logger.info("conn " + conn.getId() + " write sth to server in 30s");
                 }
             }
         });
