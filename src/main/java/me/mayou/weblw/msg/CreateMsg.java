@@ -73,6 +73,7 @@ public class CreateMsg extends Msg {
 
             @Override
             public void handle(Void event) {
+                conns.remove(conn.getId());
                 vertx.cancelTimer(conn.getTimerId());
                 logger.info("conn " + conn.getId() + " has been closed");
             }
