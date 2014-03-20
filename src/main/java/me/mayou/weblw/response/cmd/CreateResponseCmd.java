@@ -50,7 +50,7 @@ public class CreateResponseCmd extends ResponseCmd {
 
             @Override
             public void handle(Long timerId) {
-                if (Math.abs(System.currentTimeMillis() - conn.getLastWriteTime() - 30000) <= 100) {
+                if (System.currentTimeMillis() - conn.getLastWriteTime() > 29900) {
                     Packet packet = new Packet();
                     packet.setCmd("heartbeat");
                     packet.setId(conn.getNextPacketId());
@@ -69,7 +69,7 @@ public class CreateResponseCmd extends ResponseCmd {
 
             @Override
             public void handle(Long timerId) {
-                if (System.currentTimeMillis() - conn.getLastReadTime() >= 60000) {
+                if (System.currentTimeMillis() - conn.getLastReadTime() >= 59900) {
                     conns.remove(conn.getId());
                     try {
                         conn.getWs().close();

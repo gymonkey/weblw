@@ -57,7 +57,7 @@ public class CreateMsg extends Msg {
 
             @Override
             public void handle(Long timerId) {
-                if (System.currentTimeMillis() - conn.getReadOpsTime() >= 60000) {
+                if (System.currentTimeMillis() - conn.getReadOpsTime() >= 59900) {
                     conns.remove(conn.getId());
                     try {
                         conn.getWs().close();
