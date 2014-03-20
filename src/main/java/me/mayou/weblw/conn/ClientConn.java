@@ -7,8 +7,6 @@ package me.mayou.weblw.conn;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.vertx.java.core.http.WebSocket;
 
 /**
@@ -16,8 +14,6 @@ import org.vertx.java.core.http.WebSocket;
  */
 public class ClientConn {
 
-    private static final Logger logger = LoggerFactory.getLogger(ClientConn.class);
-    
     private int           id;
 
     private WebSocket     ws;
@@ -78,7 +74,6 @@ public class ClientConn {
     }
     
     public void setLastWriteTime(long lastWriteTime) {
-        logger.info("conn " + id + " set lastWriteTie " + lastWriteTime);
         this.lastWriteTime = lastWriteTime;
     }
     
