@@ -5,6 +5,9 @@
  */
 package me.mayou.weblw.chat;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import me.mayou.weblw.msg.MsgChain;
 
 import org.slf4j.Logger;
@@ -12,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.vertx.java.core.AsyncResult;
 import org.vertx.java.core.Handler;
 import org.vertx.java.core.buffer.Buffer;
+import org.vertx.java.core.eventbus.Message;
 import org.vertx.java.core.http.HttpServer;
 import org.vertx.java.core.http.ServerWebSocket;
 import org.vertx.java.platform.Verticle;
@@ -21,10 +25,10 @@ import org.vertx.java.platform.Verticle;
  */
 public class ChatServer extends Verticle {
 
-    private static final Logger                           logger = LoggerFactory.getLogger(ChatServer.class);
-    
-    private MsgChain chain;
-    
+    private static final Logger logger = LoggerFactory.getLogger(ChatServer.class);
+
+    private MsgChain            chain;
+
     @Override
     public void start() {
         chain = new MsgChain(vertx);
@@ -46,11 +50,20 @@ public class ChatServer extends Verticle {
             @Override
             public void handle(AsyncResult<HttpServer> event) {
                 logger.info(String.valueOf(event.succeeded()));
-                if (!event.succeeded()) {
-                    logger.error(event.cause().getMessage());
+                try {
+                    vertx.eventBus().publish("weblw.chatserver.addr", InetAddress.getLocalHost().getHostAddress());
+                } catch (UnknownHostException e) {
+                    logger.error("error occur when get local address");
                 }
             }
 
+        });
+        vertx.eventBus().registerHandler("weblw.chatserver.addr", new Handler<Message<String>>() {
+
+            @Override
+            public void handle(Message<String> msg) {
+                System.out.println("hey, a new server has join us, his address is " + msg.body());
+            }
         });
     }
 

@@ -57,7 +57,7 @@ public class CreateResponseCmd extends ResponseCmd {
                     packet.setFid(conn.getId());
 
                     conn.getWs().writeTextFrame(new Gson().toJson(packet));
-                    
+                    conn.putPacket(packet);
                     conn.setLastWriteTime(System.currentTimeMillis());
                 }else{
                     logger.info("conn " + conn.getId() + " write sth to server in 30s");
